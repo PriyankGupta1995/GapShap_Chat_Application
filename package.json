@@ -1,0 +1,48 @@
+{
+  "name": "gapshap_chat_app",
+  "version": "1.0.0",
+  "description": "Real time chat application.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PriyankGupta1995/GapShap_Chat_Application.git"
+  },
+  "keywords": [
+    "Chat",
+    "Application",
+    "NodeJS",
+    "MongoDB",
+    "Redis",
+    "SocketIO"
+  ],
+  "author": "Priyank Gupta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PriyankGupta1995/GapShap_Chat_Application/issues"
+  },
+  "homepage": "https://github.com/PriyankGupta1995/GapShap_Chat_Application#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "body-parser": "^1.18.3",
+    "config": "^3.1.0",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.4",
+    "debug": "^4.1.1",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-async-errors": "^3.1.1",
+    "express-session": "^1.16.1",
+    "express-validator": "^5.3.1",
+    "helmet": "^3.16.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.11",
+    "mongoose": "^5.5.1",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.10.2"
+  }
+}
