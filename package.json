@@ -15,7 +15,6 @@
     "Application",
     "NodeJS",
     "MongoDB",
-    "Redis",
     "SocketIO"
   ],
   "author": "Priyank Gupta",

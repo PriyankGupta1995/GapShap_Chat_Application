@@ -6,6 +6,7 @@ const _ = require('lodash');
 
 const auth = require('../middleware/authentication');
 const roomManager = require('../manager/room');
+const {InvalidRequestError} = require('../model/custom-errors');
 
 router.get('/all', auth, async (request, response, next) => {
     try {
