@@ -14,6 +14,7 @@ A Real Time Chat Application built using Node.js, Express, Mongoose and Socket.i
 + Passwords are hashed using [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs) package.
 + Real-time communication between a client and a server using [Socket.io](https://github.com/socketio/socket.io).
 + Uses [MongoDB](https://github.com/mongodb/mongo), [Mongoose](https://github.com/Automattic/mongoose) for storing and querying data.
++ Uses [JWT](https://jwt.io/) for authentication and stores the token in a cookie.
 
 ## Functionality<a name="features"></a>
 + Allows users to register and login to the chat application.
@@ -24,18 +25,24 @@ A Real Time Chat Application built using Node.js, Express, Mongoose and Socket.i
 ## Installation<a name="installation"></a>
 ### Running Locally
 
-1. Clone or Download the repository
+1. Install NodeJS and MongoDB and have MongoDB running.
+
+2. Clone or Download the repository
 
 	```
 	$ git clone https://github.com/PriyankGupta1995/GapShap_Chat_Application
-	$ cd chat.io
+	$ cd gapshap
 	```
-2. Install Dependencies
+3. Install Dependencies
 
 	```
 	$ npm install
 	```
-2. Add configuration for key '
+4. Add configuration for key 'jwtPrivateKey'.
+        ```
+	$ set gapShap_jwtPrivateKey=<secretKey> (Windows)        
+	$ export gapShap_jwtPrivateKey=<secretKey> (Mac, Linux)
+	```
 
 5. Start the application
 
@@ -46,7 +53,7 @@ A Real Time Chat Application built using Node.js, Express, Mongoose and Socket.i
 
 ## Structure<a name="Structure"></a>
 
-+ All app related components are present in app , public files(CSS, JS) stored in public directory.
++ All app related components are present in app , public files(CSS, JS) stored in public directory and views(EJS) in views directory.
 + The routes have been placed in app/routes. They interact with managers to handle the client requests. 
 + Managers in turn rely upon Dao for database operations.
 + Utils directory contains utility functions for hashing , tokenizing.
