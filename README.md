@@ -39,6 +39,7 @@ A Real Time Chat Application built using Node.js, Express, Mongoose and Socket.i
 	$ npm install
 	```
 4. Add configuration for key 'jwtPrivateKey'.
+
         ```
 	$ set gapShap_jwtPrivateKey=<secretKey> (Windows)        
 	$ export gapShap_jwtPrivateKey=<secretKey> (Mac, Linux)
