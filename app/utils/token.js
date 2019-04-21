@@ -1,7 +1,8 @@
-'use strict'
+'use strict';
 
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const {InternalServiceError} = require('../model/custom-errors');
 
 const JWT_CONFIG_KEY = 'jwtPrivateKey';
 
@@ -13,11 +14,11 @@ function validateToken(token) {
     try {
         return jwt.verify(token, config.get(JWT_CONFIG_KEY));
     } catch(ex) {
-        console.log("Exception occured");
+        throw new InternalServiceError("validateToken");
     }
 }
 
 module.exports = {
     tokenizeItem: tokenizeItem,
     validateToken: validateToken
-}
+};

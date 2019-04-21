@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const tokenUtils = require('../utils/token');
 

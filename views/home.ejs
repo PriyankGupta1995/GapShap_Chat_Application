@@ -33,7 +33,7 @@
     <ul>
     <% if(userDetails.connections.length > 0) { %>
 <% userDetails.connections.forEach(function(connection) { %>
-    <a href="/chat/<%= connection.userId %>">
+    <a href="/user/chat/<%= connection.userId %>">
             <li class="room-item"><%= (connection.username.length > 25? connection.username.substr(0, 25) + '...': connection.username) %></li>
             </a>
             <% }); %>
@@ -50,7 +50,6 @@
 
 
     <div class="user-profile" style="height:100%;">
-        <form action="/user/checkProfile" method="POST">
         <img src="<%= userDetails.profilePicture %>" alt="<%= userDetails.username %>" />
         <div class="about" style="text-align: center;">
             <input class="hidden" type="hidden" name="profilePicture" value="<%= userDetails.profilePicture %>"><br>
@@ -62,9 +61,10 @@
             <% } else { %>
                 <i class="fa fa-circle offline"></i> <input class="hidden" type="text" name="status" value="<%= userDetails.status %>"><br>
             <% } %>
-            <button id="updateBtn" class="button" type="submit"> Update Profile</button>
         </div>
-        </form>
+        <div class="controls" style="width: 100%; text-align: center">
+            <a href="/user/checkProfile/<%=userDetails.emailId%>" class="rooms-btn">Update Profile</a>
+        </div>
     </div>
     </div>
 </div> <!-- end container -->

@@ -2,7 +2,7 @@
 <html >
 <head>
     <meta charset="UTF-8">
-    <title>Chat IO</title>
+    <title>GapShap</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
 </head>
@@ -16,6 +16,8 @@
             Access Denied! Your credentials are missing.
         <% } else if (error === 'InternalIssue') { %>
             Sorry, something failed. Please try again after some time.
+        <% } else if (error === 'InvalidRequest') { %>
+                The input provided is not valid.
         <% } %>
     </p>
 </div> <!-- end container -->

@@ -24,11 +24,15 @@
         </form>
     </div> <!-- end room-create -->
 
+    <% if (error != null) { %>
+        <p class="message error"><%= error %></p>
+    <% } %>
+
     <div class="room-list">
     <ul>
     <% if(rooms.length > 0) { %>
 <% rooms.forEach(function(room) { %>
-    <a href="rooms/chat/<%= room.title %>">
+    <a href="/rooms/chat/<%= room.title %>">
             <li class="room-item"><%= (room.title.length > 25? room.title.substr(0, 25) + '...': room.title) %></li>
             </a>
             <% }); %>

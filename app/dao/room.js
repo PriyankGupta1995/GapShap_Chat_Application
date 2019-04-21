@@ -1,12 +1,13 @@
-'use strict'
+'use strict';
 
-const Room = require('../model/room');
+const Room = require('../model/db/room');
+const {InternalServiceError} = require('../model/custom-errors');
 
 async function findRoomByTitle(title) {
     try {
         return await Room.findOne( {title: title});
-    } catch(err) {
-        console.log("exception occured findUserByEmailId");
+    } catch(error) {
+        throw new InternalServiceError(`findRoomByTitle with ${title}`);
     }
 }
 
@@ -15,20 +16,24 @@ async function createRoom(title) {
     try {
         await newRoom.save();
     } catch(err) {
-        console.log(err);
+        throw new InternalServiceError(`createRoom with ${title}`);
     }
 }
 
 async function updateRoom(roomDetails) {
-    if(!connections || connections.length === 0) {
-        return;
+    if(!roomDetails.connection) {
+        return findRoomByTitle(roomDetails.title);
     }
-    const connectionsToUpdate = {connections: connections};
+    const connectionToUpdate = {
+        userId: roomDetails.connection.emailId,
+        username: roomDetails.connection.username
+    };
 
     try {
-        await Room.findOneAndUpdate({title: roomDetails.title}, connectionsToUpdate);
+        return await Room.findOneAndUpdate(
+            {title: roomDetails.title}, {$addToSet: {connections: connectionToUpdate}}, {new:true});
     } catch(error) {
-        console.log("Could not update room");
+        throw new InternalServiceError(`updateRoom with ${title}`);
     }
 }
 
@@ -36,7 +41,17 @@ async function getAllRooms() {
     try {
         return await Room.find( {}, 'title');
     } catch(err) {
-        console.log("exception occured getAllRooms");
+        throw new InternalServiceError("getAllRooms");
+    }
+}
+
+async function removeFromRoom(title, userEmailId) {
+    try {
+        const connection = {userId: userEmailId};
+        return await Room.findOneAndUpdate(
+            {title: roomDetails.title}, {$pull: {connections: connection}}, {new:true});
+    } catch(err) {
+        throw new InternalServiceError(`removeFromRoom with ${title}`);
     }
 }
 
@@ -44,5 +59,6 @@ module.exports = {
     findRoomByTitle: findRoomByTitle,
     createRoom: createRoom,
     updateRoom: updateRoom,
-    getAllRooms: getAllRooms
+    getAllRooms: getAllRooms,
+    removeFromRoom: removeFromRoom
 };

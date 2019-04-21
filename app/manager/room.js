@@ -1,23 +1,50 @@
-'use strict'
+'use strict';
 
 const _ = require('lodash');
 
 const roomDao = require('../dao/room');
+const {InvalidRequestError} = require('../model/custom-errors');
 
 async function createNewRoom(roomTitle) {
-    const room = await roomDao.findRoomByTitle(roomTitle);
-    if(room) {
-        console.log("Room already created.");
-    }
+    try {
+        const room = await roomDao.findRoomByTitle(roomTitle);
+        if(room) {
+            throw new InvalidRequestError("Room already created.");
+        }
 
-    await roomDao.createRoom(roomTitle);
+        await roomDao.createRoom(roomTitle);
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function getAllRooms() {
-    return await roomDao.getAllRooms();
+    try {
+        return await roomDao.getAllRooms();
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getRoom(title) {
+    try {
+        return await roomDao.findRoomByTitle(title);
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function updateRoom(roomDetails) {
+    try {
+        return await roomDao.updateRoom(roomDetails);
+    } catch (error) {
+        throw error;
+    }
 }
 
 module.exports = {
     createNewRoom: createNewRoom,
-    getAllRooms: getAllRooms
+    getAllRooms: getAllRooms,
+    getRoom: getRoom,
+    updateRoom: updateRoom
 }

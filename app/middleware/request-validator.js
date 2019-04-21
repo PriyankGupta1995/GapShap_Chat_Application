@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const {check} = require('express-validator/check/index');
 
@@ -8,11 +8,20 @@ const usernameValidator = check('username')
     .isLength({min: 5}, {max: 50}).withMessage('Username should be at least 5 characters long and at max 50 characters.');
 
 const optionalUsernameValidator = check('username')
+    .optional()
     .isAlphanumeric().withMessage('Username should only consist of numbers and letters.')
     .isLength({min: 5}, {max: 50}).withMessage('Username should be at least 5 characters long and at max 50 characters.');
 
 const passwordValidator = check('password')
     .exists().withMessage('Password is required.')
+    .isAlphanumeric().withMessage('Password should only consist of numbers and letters.')
+    .isLength({min: 8}, {max: 50}).withMessage('Password should be at least 8 characters long and at max 50 characters.')
+    .matches('[0-9]').withMessage('Password must contain at least 1 number.')
+    .matches('[a-z]').withMessage('Password must contain at least 1 lowercase character.')
+    .matches('[A-Z]').withMessage('Password must contain at least 1 uppercase character.');
+
+const optionalPasswordValidator = check('password')
+    .optional()
     .isAlphanumeric().withMessage('Password should only consist of numbers and letters.')
     .isLength({min: 8}, {max: 50}).withMessage('Password should be at least 8 characters long and at max 50 characters.')
     .matches('[0-9]').withMessage('Password must contain at least 1 number.')
@@ -32,7 +41,7 @@ const profilePictureValidator = check('profilePicture')
 const userRegistrationValidator = [emailIdValidator, usernameValidator, passwordValidator];
 const userLoginValidator = [emailIdValidator, passwordValidator];
 const userEmailIdValidator = [emailIdValidator];
-const userUpdateProfileValidator = [emailIdValidator, optionalUsernameValidator];
+const userUpdateProfileValidator = [emailIdValidator, optionalUsernameValidator, optionalPasswordValidator];
 
 module.exports = {userRegistration : userRegistrationValidator,
     userLogin: userLoginValidator,

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>GapShap</title>
+    <script></script>
     <link rel="stylesheet" href="/css/style.css">
     <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
 </head>
@@ -34,16 +35,39 @@
     </div> <!-- end chat -->
 
     <div class="controls">
-        <a href="user//logout" class="logout-btn">Logout</a>
+        <a href="/user/logout" class="logout-btn">Logout</a>
         <a href="/rooms/all" class="rooms-btn">Rooms</a>
     </div>
 
+    <input type="hidden" id="isRoom" value="<%= isRoom %>">
+
     <div class="users-list">
         <ul class="list">
-            
+            <% if(connections.length > 0) { %>
+                <% connections.forEach(function(connection) { %>
+                    <li class="clearfix">
+                        <img src="/img/default-profile-picture.jpg" alt="<%= connection.username %>" />
+                        <a href="/user/checkProfile/<%= connection.userId %>"> <div class="about">
+                            <div class="name"><%= connection.username %></div>
+                            <div class="status"><i class="fa fa-circle online"></i> online</div>
+                        </div></a>
+                    </li>
+                <% }); %>
+            <% } %>
         </ul>
     </div>
 </div> <!-- end container -->
 <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/main.js"></script>
+<script>
+    $(function(){
+        if('<%= isRoom%>' === 'false') {
+            app.userChat('<%= userDetails.emailId %>', '<%= connections[0].emailId %>', '<%= userDetails.username %>');
+        } else {
+            app.roomChat('<%= title %>', '<%= userDetails.username %>','<%= userDetails.emailId %>' );
+        }
+    });
+</script>
 </body>
 </html>

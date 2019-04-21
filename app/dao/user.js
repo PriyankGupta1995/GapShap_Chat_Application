@@ -1,16 +1,17 @@
-'use strict'
+'use strict';
 
 const _ = require('lodash');
 
-const User = require('../model/user');
+const User = require('../model/db/user');
 const hashUtils = require('../utils/hash');
 const tokenUtils = require('../utils/token');
+const {InternalServiceError} = require('../model/custom-errors');
 
 async function findUserByEmailId(emailId) {
     try {
         return await User.findOne( {emailId: emailId});
     } catch(err) {
-        console.log("exception occured findUserByEmailId");
+        throw new InternalServiceError(`findUserByEmailId with emailId: ${emailId}`);
     }
 }
 
@@ -25,7 +26,7 @@ async function createUser(userDetails) {
 
         await newUser.save();
     } catch(err) {
-        console.log("Exception occured. createUser");
+        throw new InternalServiceError(`createUser with emailId: ${userDetails.emailId}`);
     }
 }
 
@@ -35,24 +36,43 @@ function getUserToken(userDetails) {
 }
 
 async function updateUser(userDetails) {
+    let userDetailsToUpdate = getNonEmptyUserDetailsToUpdate(userDetails);
+
+    try {
+        if (userDetailsToUpdate.password) {
+            userDetailsToUpdate.password = hashUtils.hashField(userDetailsToUpdate.password);
+        }
+        if(userDetails.connection) {
+            const connection = {
+                userId: userDetails.connection.emailId,
+                username: userDetails.connection.username
+            };
+            return await User.findOneAndUpdate(
+                {emailId: userDetails.emailId},
+                {$set: userDetailsToUpdate, $addToSet: {connections: connection}}, {new: true});
+    }
+        else {
+            return await User.findOneAndUpdate({emailId: userDetails.emailId}, userDetailsToUpdate, {new: true});
+        }
+    } catch(error) {
+        throw new InternalServiceError(`updateUser with emailId: ${userDetails.emailId}`);
+    }
+}
+
+function getNonEmptyUserDetailsToUpdate(userDetails) {
     let userDetailsToUpdate = {
         username: userDetails.username,
         profileStatus: userDetails.profileStatus,
         status: userDetails.status,
-        password: userDetails.password
+        password: userDetails.password,
     };
 
-    for(let userDetail in userDetailsToUpdate) {
-        if(!userDetailsToUpdate[userDetail]) {
+    for (let userDetail in userDetailsToUpdate) {
+        if (!userDetailsToUpdate[userDetail]) {
             delete userDetailsToUpdate[userDetail];
         }
     }
-
-    try {
-        return await User.findOneAndUpdate({emailId: userDetails.emailId}, userDetailsToUpdate, {new: true});
-    } catch(error) {
-        console.log("Could not update user");
-    }
+    return userDetailsToUpdate;
 }
 
 module.exports = {

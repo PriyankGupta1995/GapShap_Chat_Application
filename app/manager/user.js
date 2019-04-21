@@ -1,50 +1,68 @@
-'use strict'
+'use strict';
 
 const _ = require('lodash');
 
 const userDao = require('../dao/user');
 const hashUtils = require('../utils/hash');
+const {InvalidRequestError} = require('../model/custom-errors');
 
 async function registerNewUser(userDetails) {
-    const user = await userDao.findUserByEmailId(userDetails.emailId);
-    if(user) {
-        console.log("User already registered.");
+    try {
+        const user = await userDao.findUserByEmailId(userDetails.emailId);
+        if(user) {
+            throw new InvalidRequestError("User with given email id already exists.");
+        }
+        await userDao.createUser(userDetails);
+    } catch (error) {
+        throw error;
     }
-
-    await userDao.createUser(userDetails);
 }
 
 async function userLogin(userDetails) {
-    const user = await userDao.findUserByEmailId(userDetails.emailId);
-    if(!user) {
-        console.log("User does not exist.");
+    try {
+        const user = await userDao.findUserByEmailId(userDetails.emailId);
+        if(!user) {
+            throw new InvalidRequestError("Invalid username or password.");
+        }
+
+        const isAuthenticUser = await hashUtils.compareFields(userDetails.password, user.password);
+        if(!isAuthenticUser) {
+            throw new InvalidRequestError("Invalid username or password.");
+        }
+
+        const userDetailsWithOnlineStatus = {emailId: userDetails.emailId, status: 'Online'};
+        const updatedUser = await updateUser(userDetailsWithOnlineStatus);
+
+        const userToken = userDao.getUserToken(user);
+        const loggedInUserDetails = getUserDetailsWithoutPassword(updatedUser);
+        return {userToken: userToken, loggedInUserDetails: loggedInUserDetails};
+    } catch (error) {
+        throw error;
     }
 
-    const isAuthenticUser = await hashUtils.compareFields(userDetails.password, user.password);
-    if(!isAuthenticUser) {
-        console.log("User is unauthentic.");
-    }
-
-    const userDetailsWithOnlineStatus = {emailId: userDetails.emailId, status: 'Online'};
-    const updatedUser = await updateUser(userDetailsWithOnlineStatus);
-
-    const userToken = userDao.getUserToken(user);
-    const loggedInUserDetails = getUserDetailsWithoutPassword(updatedUser);
-    return {userToken: userToken, loggedInUserDetails: loggedInUserDetails};
 }
 
 async function getUser(userEmailId) {
-    const user = await userDao.findUserByEmailId(userEmailId);
-    if(!user) {
-        console.log("User does not exist.");
+    try {
+        const user = await userDao.findUserByEmailId(userEmailId);
+        if(!user) {
+            throw new InvalidRequestError("User does not exist.");
+        }
+        return  getUserDetailsWithoutPassword(user);
+    } catch (error) {
+        throw error;
     }
 
-    return  getUserDetailsWithoutPassword(user);
 }
 
 async function updateUser(userDetailsToUpdate) {
-    const updatedUser = await userDao.updateUser(userDetailsToUpdate);
-    return getUserDetailsWithoutPassword(updatedUser);
+    try {
+        const updatedUser = await userDao.updateUser(userDetailsToUpdate);
+        return getUserDetailsWithoutPassword(updatedUser);
+    } catch (error) {
+        throw error;
+    }
+
 }
 
 function getUserDetailsWithoutPassword(userDetails) {
