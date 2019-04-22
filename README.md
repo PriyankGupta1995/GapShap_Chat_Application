@@ -7,6 +7,7 @@ A Real Time Chat Application built using Node.js, Express, Mongoose and Socket.i
 + [Functionality](#features)
 + [Installation](#installation)
 + [Structure](#Structure)
++ [Structure](#Improvements)
 
 ## Features<a name="features"></a>
 + Uses Express as the application Framework.
@@ -73,8 +74,15 @@ handle the requests.
 + Utils class are just helper classes and can be used across layers as required.
 + Having this kind of seperation between layers allows flexibility and modularization of the application. If in the future, a data migration to another database is 
 planned, only the DAO layer would be affected. Same is true for utils.Eg:- If a different hashing algorithm is required for all fields.
++ MongoDB has been chosen as the database for users and rooms since the query patterns are quite simple. Only CRUD operations using emailId or roomTitle are required. 
 + In a real world scenario, I would have also preferred having seperate business objects to be used in manager layer and have transformers in between while passing it to the DB 
 . But since only user and room models were required, I thought to avoid unncessary overload.
+
+## Improvements<a name="Improvements"></a>
+
++ Logging.
++ Unit tests.
++ Data store for storing chats. Redis would be preferred because of its speed which is required for a real time chat application.It could be used to store last 50 messages and if client wants to view older messages, we could have a permanent datasore like MySQL. Through MySQL, search functionality could also be provided to the client.
 
 
  
