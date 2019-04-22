@@ -7,7 +7,7 @@ A Real Time Chat Application built using Node.js, Express, Mongoose and Socket.i
 + [Functionality](#features)
 + [Installation](#installation)
 + [Structure](#Structure)
-+ [Structure](#Improvements)
++ [Improvements](#Improvements)
 
 ## Features<a name="features"></a>
 + Uses Express as the application Framework.
