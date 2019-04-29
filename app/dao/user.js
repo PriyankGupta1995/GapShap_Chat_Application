@@ -47,14 +47,24 @@ async function updateUser(userDetails) {
                 userId: userDetails.connection.emailId,
                 username: userDetails.connection.username
             };
-            return await User.findOneAndUpdate(
-                {emailId: userDetails.emailId},
-                {$set: userDetailsToUpdate, $addToSet: {connections: connection}}, {new: true});
+
+            const updatedUser = await User.findOneAndUpdate(
+                {emailId: userDetails.emailId, 'connections.userId' : {$ne: connection.userId}},
+                {$set: userDetailsToUpdate, $push: {connections: connection}}, {new: true});
+
+            if(updatedUser) {
+                return updatedUser;
+            } else {
+                return findUserByEmailId(userDetails.emailId);
+            }
+
+            return updatedUser;
     }
         else {
             return await User.findOneAndUpdate({emailId: userDetails.emailId}, userDetailsToUpdate, {new: true});
         }
     } catch(error) {
+        console.log(error);
         throw new InternalServiceError(`updateUser with emailId: ${userDetails.emailId}`);
     }
 }

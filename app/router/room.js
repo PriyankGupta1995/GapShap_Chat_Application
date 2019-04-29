@@ -6,6 +6,7 @@ const _ = require('lodash');
 
 const auth = require('../middleware/authentication');
 const roomManager = require('../manager/room');
+const chatManager = require('../manager/chat');
 const {InvalidRequestError} = require('../model/custom-errors');
 
 router.get('/all', auth, async (request, response, next) => {
@@ -40,10 +41,12 @@ router.get('/chat/:title', auth, async (request, response, next) => {
             connection: _.pick(request.user,['emailId','username'])
         };
         const updatedRoom = await roomManager.updateRoom(roomDetailsToUpdate);
-
+        console.log(`UpdatedUsersList(Router): ${updatedRoom.connections}`);
         const userDetails = _.pick(request.user,['emailId','username']);
+        const chat = await chatManager.getChat(room.title);
+
         response.render('chat', {title: room.title, connections: updatedRoom.connections, isRoom: true,
-            userDetails: userDetails});
+            userDetails: userDetails, chat: chat});
     } catch(error) {
         next(error);
     }

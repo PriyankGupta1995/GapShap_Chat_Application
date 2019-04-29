@@ -41,6 +41,15 @@ app.use(function(request, response, next) {
 
 app.use(errorHandler);
 
+process
+    .on('unhandledRejection', error => {
+        console.error(error, 'Unhandled Rejection');
+    })
+    .on('uncaughtException', error => {
+        console.error(error, 'Uncaught Exception thrown');
+        process.exit(1);
+    });
+
 const port = process.env.PORT || 3000;
 
 server.listen(port);

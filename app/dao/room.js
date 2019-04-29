@@ -30,8 +30,15 @@ async function updateRoom(roomDetails) {
     };
 
     try {
-        return await Room.findOneAndUpdate(
-            {title: roomDetails.title}, {$addToSet: {connections: connectionToUpdate}}, {new:true});
+        const updatedRoom = await Room.findOneAndUpdate(
+            {title: roomDetails.title, 'connections.userId' : {$ne: connectionToUpdate.userId}},
+            {$push: {connections: connectionToUpdate}}, {new:true});
+
+        if(updatedRoom) {
+            return updatedRoom;
+        } else {
+            return findRoomByTitle(roomDetails.title);
+        }
     } catch(error) {
         throw new InternalServiceError(`updateRoom with ${title}`);
     }
@@ -49,7 +56,7 @@ async function removeFromRoom(title, userEmailId) {
     try {
         const connection = {userId: userEmailId};
         return await Room.findOneAndUpdate(
-            {title: roomDetails.title}, {$pull: {connections: connection}}, {new:true});
+            {title: title}, {$pull: {connections: connection}}, {new:true});
     } catch(err) {
         throw new InternalServiceError(`removeFromRoom with ${title}`);
     }

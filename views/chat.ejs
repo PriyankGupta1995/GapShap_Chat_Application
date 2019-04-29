@@ -25,6 +25,18 @@
 
         <div class="chat-history">
             <ul>
+                <% if(chat.messages.length > 0) { %>
+                    <% chat.messages.forEach(function(message) { %>
+                    <% message.date = (new Date(message.date)).toLocaleString();%>
+                        <li>
+                            <div class="message-data">
+                                <span class="message-data-name"> <%= message.username %></span>
+                                <span class="message-data-time"> <%= message.date %></span>
+                            </div>
+                            <div class="message my-message" dir="auto"> <%= message.content %></div>
+                        </li>
+                    <% }); %>
+                <% } %>
             </ul>
         </div> <!-- end chat-history -->
 
@@ -38,8 +50,6 @@
         <a href="/user/logout" class="logout-btn">Logout</a>
         <a href="/rooms/all" class="rooms-btn">Rooms</a>
     </div>
-
-    <input type="hidden" id="isRoom" value="<%= isRoom %>">
 
     <div class="users-list">
         <ul class="list">
@@ -63,7 +73,8 @@
 <script>
     $(function(){
         if('<%= isRoom%>' === 'false') {
-            app.userChat('<%= userDetails.emailId %>', '<%= connections[0].emailId %>', '<%= userDetails.username %>');
+            app.userChat('<%= userDetails.emailId %>', '<%= connections[0].userId %>', '<%= userDetails.username %>',
+                '<%= chat.chatId %>');
         } else {
             app.roomChat('<%= title %>', '<%= userDetails.username %>','<%= userDetails.emailId %>' );
         }

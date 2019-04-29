@@ -47,4 +47,4 @@ module.exports = {
     getAllRooms: getAllRooms,
     getRoom: getRoom,
     updateRoom: updateRoom
-}
+};

@@ -2,20 +2,14 @@
 
 var app = {
 
-    userChat: function(currentUserEmailId, chatUserEmailId, currentUsername){
+    userChat: function(currentUserEmailId, chatUserEmailId, currentUsername, chatId){
 
         var socket = io('/user/chat', { transports: ['websocket'] });
 
         // When socket connects, join the current chatroom
         socket.on('connect', function () {
 
-            let userChatId;
-
-            socket.emit('joinUser', currentUserEmailId, chatUserEmailId);
-
-            socket.on('userChatId', function(chatId) {
-                userChatId = chatId;
-            });
+            socket.emit('joinUser', currentUserEmailId, chatUserEmailId, chatId);
 
             // Whenever the user hits the save button, emit newMessage event.
             $(".chat-message button").on('click', function(e) {
@@ -23,13 +17,14 @@ var app = {
                 var textareaEle = $("textarea[name='message']");
                 var messageContent = textareaEle.val().trim();
                 if(messageContent !== '') {
+
                     var message = {
                         content: messageContent,
                         username: currentUsername,
                         date: Date.now()
                     };
 
-                    socket.emit('newMessageUser', userChatId, message);
+                    socket.emit('newMessageUser', chatId, message);
                     textareaEle.val('');
                     app.helpers.addMessage(message);
                 }
@@ -42,14 +37,14 @@ var app = {
         });
     },
 
-    roomChat: function(roomTitle, currentUsername, userEmailId){
+    roomChat: function(roomTitle, currentUsername, currentUserEmailId){
 
         var socket = io('/rooms/chat', { transports: ['websocket'] });
 
         // When socket connects, join the current chatroom
         socket.on('connect', function () {
 
-            socket.emit('joinRoom', roomTitle);
+            socket.emit('joinRoom', roomTitle, currentUserEmailId);
 
             // Update users list upon emitting updateUsersList event
             socket.on('updateUsersList', function(users) {
@@ -81,10 +76,6 @@ var app = {
                 app.helpers.addMessage(message);
             });
 
-            socket.on('getRoomTitle', function() {
-                socket.emit('removeUser', roomTitle, userEmailId);
-            });
-
             socket.on('removeUser', function(userEmailId) {
                 $('li#user-' + userEmailId).remove();
                 app.helpers.updateNumOfUsers();
@@ -107,16 +98,16 @@ var app = {
             var html = '';
             for(var user of users) {
                 user.username = this.encodeHTML(user.username);
-                html += `<li class="clearfix" id="user-${user.emailId}">
+                html += `<li class="clearfix" id="user-${user.userId}">
                      <img src="/img/default-profile-picture" alt="${user.username}" />
-                     <a href="/user/checkProfile/${user.emailId}" <div class="about">
+                     <a href="/user/checkProfile/${user.userId}" <div class="about">
                         <div class="name">${user.username}</div>
                         <div class="status"><i class="fa fa-circle online"></i> online</div>
                      </div></a></li>`;
             }
 
             if(html === ''){ return; }
-            $('.users-list ul').prepend(html);
+            $('.users-list ul').html('').html(html);
 
             this.updateNumOfUsers();
         },
@@ -141,7 +132,7 @@ var app = {
         },
 
         // Update number of online users in the current room
-        // This method MUST be called after adding, or removing list element(s)
+        //         // This method MUST be called after adding, or removing list element(s)
         updateNumOfUsers: function(){
             var num = $('.users-list ul li').length;
             $('.chat-num-users').text(num +  " User(s)");

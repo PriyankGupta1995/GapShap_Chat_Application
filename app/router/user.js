@@ -7,6 +7,7 @@ const _ = require('lodash');
 const auth = require('../middleware/authentication');
 const validator = require('../middleware/request-validator');
 const userManager = require('../manager/user');
+const chatManager = require('../manager/chat');
 const {InvalidRequestError} = require('../model/custom-errors');
 
 router.post('/register', validator.userRegistration, async (request, response, next) => {
@@ -108,8 +109,11 @@ router.get('/chat/:emailId', auth, validator.userEmail, async (request, response
         const updatedUser = await userManager.updateUser(userDetailsToUpdate);
         const updatedUserDetails = _.pick(updatedUser,['emailId','username']);
 
+        const chatId = _createChatId(userEmailId.emailId, request.user.emailId);
+        const chat = await chatManager.getChat(chatId);
+
         response.render('chat', {title: displayedUserDetails.username,
-            connections: [displayedUserDetails], isRoom: false, userDetails: updatedUserDetails});
+            connections: [displayedUserDetails], isRoom: false, userDetails: updatedUserDetails, chat: chat});
     } catch(error) {
         next(error);
     }
@@ -145,6 +149,13 @@ function handleRegisterUserError(error, request, response, next) {
     } else {
         next(error);
     }
+}
+
+function _createChatId(chatUserEmailId, currentUserEmailId) {
+    const chatId = (currentUserEmailId < chatUserEmailId)?
+        currentUserEmailId + chatUserEmailId
+        : chatUserEmailId + currentUserEmailId;
+    return chatId;
 }
 
 module.exports = router;

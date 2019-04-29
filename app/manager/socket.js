@@ -1,52 +1,68 @@
 'use strict';
 
 const roomDao = require('../dao/room');
+const chatDao = require('../dao/chat');
 
 function ioEvents(io) {
     io.of('/user/chat').on('connection', function(socket) {
 
-        socket.on('joinUser', function(currentUserEmailId, chatUserEmailId) {
-            const userChatId = (currentUserEmailId < chatUserEmailId)?
-                currentUserEmailId + chatUserEmailId
-                : chatUserEmailId + currentUserEmailId;
+        socket.on('joinUser', function(currentUserEmailId, chatUserEmailId, chatId) {
 
-            socket.join(userChatId);
-            socket.emit('userChatId', userChatId);
+            // console.log(`Current user: ${currentUserEmailId}`);
+            // console.log(`Chat user: ${chatUserEmailId}`);
+            // console.log(`Chat Id(Join): ${userChatId}`);
+            socket.join(chatId);
         });
 
-        socket.on('newMessageUser', function(userChatId, message) {
-            socket.broadcast.to(userChatId).emit('addMessageUser', message);
+        socket.on('newMessageUser', async function(chatId, message) {
+            
+            const chatDetails = {
+                chatId: chatId,
+                message: message
+            };
+            await chatDao.addMessage(chatDetails);
+            socket.broadcast.to(chatId).emit('addMessageUser', message);
         });
 
     });
 
     io.of('/rooms/chat').on('connection', async function(socket) {
 
-        socket.on('joinRoom', async function (roomTitle) {
+        let roomTitleChat, currentUserEmailId;
+
+        socket.on('joinRoom', async function (roomTitle, userEmailId) {
             socket.join(roomTitle);
+
+            roomTitleChat = roomTitle;
+            currentUserEmailId = userEmailId;
 
             const updatedRoomDetails = await roomDao.findRoomByTitle(roomTitle);
             const updatedUsersList = updatedRoomDetails.connections;
+            console.log(`Updated UsersList(Join): ${updatedUsersList}`);
 
             socket.broadcast.to(roomTitle).emit('updateUsersList', updatedUsersList);
         });
 
-        socket.on('newMessageRoom', function (roomTitle, message) {
+        socket.on('newMessageRoom', async function (roomTitle, message) {
+            const chatDetails = {
+                chatId: roomTitle,
+                message: message
+            };
+            await chatDao.addMessage(chatDetails);
+
             socket.broadcast.to(roomTitle).emit('addMessageRoom', message);
         });
 
-        socket.on('disconnect', function () {
-            socket.emit('getRoomTitle');
-        });
+        socket.on('disconnect', async function () {
+            const updatedRoom = await roomDao.removeFromRoom(roomTitleChat, currentUserEmailId);
 
-        socket.on('removeUser', async function (roomTitle, userEmailId) {
-            const updatedRoom = await roomDao.removeFromRoom(roomTitle, userEmailId);
-            socket.emit('removeUser', userEmailId);
-            socket.leave(roomTitle);
-            socket.broadcast.to(roomTitle).emit('removeUser', userEmailId);
+            console.log(`Updated UsersList(Delete): ${updatedRoom.connections}`);
+
+            socket.leave(roomTitleChat);
+            socket.broadcast.to(roomTitleChat).emit('removeUser', currentUserEmailId);
         });
     });
-};
+}
 
 module.exports = ioEvents;
 
