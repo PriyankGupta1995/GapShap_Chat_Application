@@ -24,6 +24,38 @@ function ioEvents(io) {
             socket.broadcast.to(chatId).emit('addMessageUser', message);
         });
 
+        socket.on('editMessageUser', async function(chatId, message) {
+
+            const chatDetails = {
+                chatId: chatId,
+                message: message
+            };
+            const updatedChat = await chatDao.editMessage(chatDetails);
+
+            socket.broadcast.to(chatId).emit('updateChatUser', updatedChat.messages);
+
+            // add broadcasting logic
+        });
+
+        socket.on('deleteMessageUser', async function(chatId, message) {
+
+            const chatDetails = {
+                chatId: chatId,
+                message: message
+            };
+            const updatedChat = await chatDao.deleteMessage(chatDetails);
+
+            socket.broadcast.to(chatId).emit('updateChatUser', updatedChat.messages);
+        });
+
+        socket.on('loadMoreMessagesUser', async function (chatId, pageNumber) {
+
+            const additionalChat = await chatDao.findChatById(chatId, pageNumber);
+            if(additionalChat) {
+                socket.emit("additionalMessagesUser", additionalChat.messages, additionalChat.pageNumber);
+            }
+        });
+
     });
 
     io.of('/rooms/chat').on('connection', async function(socket) {
@@ -52,6 +84,37 @@ function ioEvents(io) {
 
             socket.broadcast.to(roomTitle).emit('addMessageRoom', message);
         });
+
+        socket.on('editMessageRoom', async function (roomTitle, message) {
+            const chatDetails = {
+                chatId: roomTitle,
+                message: message
+            };
+            await chatDao.editMessage(chatDetails);
+
+            // add broadcasting logic
+        });
+
+        socket.on('deleteMessageRoom', async function (roomTitle, message) {
+            const chatDetails = {
+                chatId: roomTitle,
+                message: message
+            };
+            const updatedChat = await chatDao.deleteMessage(chatDetails);
+
+            socket.broadcast.to(roomTitle).emit('updateChatRoom', updatedChat.messages);
+        });
+
+        socket.on('loadMoreMessagesRoom', async function (roomTitle, pageNumber) {
+
+            console.log(`Page Number: ${pageNumber}`);
+            const additionalChat = await chatDao.findChatById(roomTitle, pageNumber);
+            if(additionalChat) {
+                socket.emit("additionalMessagesRoom", additionalChat.messages, additionalChat.pageNumber);
+            }
+        });
+
+
 
         socket.on('disconnect', async function () {
             const updatedRoom = await roomDao.removeFromRoom(roomTitleChat, currentUserEmailId);

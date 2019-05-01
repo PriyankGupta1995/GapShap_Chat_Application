@@ -13,14 +13,14 @@ const {InvalidRequestError} = require('../model/custom-errors');
 router.post('/register', validator.userRegistration, async (request, response, next) => {
     if(!isRequestValid(request)) {
         request.flash('showRegisterForm', true);
-        response.redirect('/');
+        return response.redirect('/');
     }
 
     const userDetails = _.pick(request.body, ['emailId', 'username', 'password']);
     try {
         await userManager.registerNewUser(userDetails);
         request.flash('success', 'Your account has been created. Please log in.');
-        response.redirect('/');
+        return response.redirect('/');
     } catch (error) {
         handleRegisterUserError(error, request, response, next);
     }
@@ -28,19 +28,19 @@ router.post('/register', validator.userRegistration, async (request, response, n
 
 router.post('/login', validator.userLogin, async (request, response, next) => {
     if(!isRequestValid(request)) {
-        response.redirect('/');
+        return response.redirect('/');
     }
     const userDetails = _.pick(request.body, ['emailId', 'password']);
     try {
         const {userToken, loggedInUserDetails} = await userManager.userLogin(userDetails);
         response.cookie('auth', userToken, {httpOnly: true});
-        response.render('home', { userDetails: loggedInUserDetails});
+        return response.render('home', { userDetails: loggedInUserDetails});
     } catch(error) {
         if(error instanceof InvalidRequestError) {
             request.flash('error', error.message);
-            response.redirect('/');
+            return response.redirect('/');
         } else {
-            next(error);
+            return next(error);
         }
     }
 });
@@ -53,9 +53,9 @@ router.post('/search', auth, validator.userEmail, async (request, response, next
         const searchUserEmailId = request.body.emailId;
         const userDetails = await userManager.getUser(searchUserEmailId);
 
-        response.redirect(`/user/chat/${userDetails.emailId}`);
+        return response.redirect(`/user/chat/${userDetails.emailId}`);
     } catch(error) {
-        next(error);
+        return next(error);
     }
 });
 
@@ -69,9 +69,9 @@ router.get('/checkProfile/:emailId', auth, validator.userEmail, async (request, 
         let userDetails = await userManager.getUser(userEmailId);
 
         userDetails = _.pick(userDetails, ['emailId','username','profileStatus','profilePicture']);
-        response.render('profile', {userDetails: userDetails, isUpdate: isProfileUpdatable});
+        return response.render('profile', {userDetails: userDetails, isUpdate: isProfileUpdatable});
     } catch(error) {
-        next(error);
+        return next(error);
     }
 });
 
@@ -83,9 +83,9 @@ router.post('/updateProfile', auth, validator.updateProfile, async(request, resp
         const userDetails = _.pick(request.body, ['emailId', 'username', 'profileStatus', 'password']);
 
         const updatedUserDetails = await userManager.updateUser(userDetails);
-        response.render('home', {userDetails: updatedUserDetails});
+        return response.render('home', {userDetails: updatedUserDetails});
     } catch(error) {
-        next(error);
+        return next(error);
     }
 });
 
@@ -112,10 +112,10 @@ router.get('/chat/:emailId', auth, validator.userEmail, async (request, response
         const chatId = _createChatId(userEmailId.emailId, request.user.emailId);
         const chat = await chatManager.getChat(chatId);
 
-        response.render('chat', {title: displayedUserDetails.username,
+        return response.render('chat', {title: displayedUserDetails.username,
             connections: [displayedUserDetails], isRoom: false, userDetails: updatedUserDetails, chat: chat});
     } catch(error) {
-        next(error);
+        return next(error);
     }
 });
 
@@ -123,9 +123,9 @@ router.get('/logout', auth, async (request, response, next) => {
     request.session.destroy();
     try {
         await userManager.updateUser({emailId: request.user.emailId, status: 'Offline'});
-        response.redirect('/');
+        return response.redirect('/');
     } catch(error) {
-        next(error);
+        return next(error);
     }
 });
 
@@ -145,9 +145,9 @@ function handleRegisterUserError(error, request, response, next) {
     if (error instanceof InvalidRequestError) {
         request.flash('error', error.message);
         request.flash('showRegisterForm', true);
-        response.redirect('/');
+        return response.redirect('/');
     } else {
-        next(error);
+        return next(error);
     }
 }
 

@@ -7,7 +7,7 @@ const {InvalidRequestError} = require('../model/custom-errors');
 
 async function getChat(chatId) {
     try {
-        const chat = await chatDao.findChatById(chatId);
+        const chat = await chatDao.findChatById(chatId, 1);
         if(chat) {
             return chat;
         }

@@ -26,16 +26,23 @@
         <div class="chat-history">
             <ul>
                 <% if(chat.messages.length > 0) { %>
+                    <button class="load-more rooms-btn">Load More</button>
                     <% chat.messages.forEach(function(message) { %>
-                    <% message.date = (new Date(message.date)).toLocaleString();%>
+                    <% const representableDate = (new Date(message.date)).toLocaleString();%>
                         <li>
                             <div class="message-data">
                                 <span class="message-data-name"> <%= message.username %></span>
-                                <span class="message-data-time"> <%= message.date %></span>
+                                <span class="message-data-time"> <%= representableDate %></span>
+                                <span class="message-data-id" hidden="hidden"><%= message._id %></span>
                             </div>
                             <div class="message my-message" dir="auto"> <%= message.content %></div>
+
+                            <% if(message.username === userDetails.username){ %>
+                                <button class="edit-message rooms-btn">Edit</button>
+                                <button class="delete-message logout-btn">Delete</button>
+                            <% }%>
                         </li>
-                    <% }); %>
+                        <% }); %>
                 <% } %>
             </ul>
         </div> <!-- end chat-history -->
@@ -74,9 +81,10 @@
     $(function(){
         if('<%= isRoom%>' === 'false') {
             app.userChat('<%= userDetails.emailId %>', '<%= connections[0].userId %>', '<%= userDetails.username %>',
-                '<%= chat.chatId %>');
+                '<%= chat.chatId %>', '<%= chat.pageNumber %>');
         } else {
-            app.roomChat('<%= title %>', '<%= userDetails.username %>','<%= userDetails.emailId %>' );
+            app.roomChat('<%= title %>', '<%= userDetails.username %>','<%= userDetails.emailId %>',
+                '<%= chat.pageNumber %>' );
         }
     });
 </script>
